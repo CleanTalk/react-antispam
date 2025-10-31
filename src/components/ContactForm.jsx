@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
-const DEFAULT_STATE = { name: '', email: '', message: '' }
+const DEFAULT_STATE = { name: '', email: '', message: '', ct_bot_detector_event_token: '' }
 
 function validate(values) {
   const errors = {}
@@ -8,6 +8,7 @@ function validate(values) {
   if (!values.email.trim()) errors.email = 'Email is required'
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errors.email = 'Email is invalid'
   if (!values.message.trim()) errors.message = 'Message is required'
+  if (!values.ct_bot_detector_event_token) errors.ct_bot_detector_event_token = 'Bot detector event token is required'
   return errors
 }
 
@@ -16,15 +17,28 @@ export default function ContactForm({ onSubmitEndpoint }) {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
   const [serverMessage, setServerMessage] = useState('')
+  const formRef = useRef(null)
 
   function handleChange(e) {
     const { name, value } = e.target
     setValues(v => ({ ...v, [name]: value }))
   }
 
+  // Get the bot detector token from the hidden field when form is submitted
+  function getBotDetectorToken() {
+    if (!formRef.current) return ''
+    const tokenField = formRef.current.querySelector('input[name="ct_bot_detector_event_token"]')
+    return tokenField ? tokenField.value : ''
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    const nextErrors = validate(values)
+    
+    // Get the bot detector token from the hidden field
+    const botToken = getBotDetectorToken()
+    const formData = { ...values, ct_bot_detector_event_token: botToken }
+    
+    const nextErrors = validate(formData)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
 
@@ -36,7 +50,7 @@ export default function ContactForm({ onSubmitEndpoint }) {
         const res = await fetch(onSubmitEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values)
+          body: JSON.stringify(formData)
         })
         if (!res.ok) throw new Error('Failed to submit form')
         setServerMessage('Thanks! Your message has been sent.')
@@ -53,7 +67,7 @@ export default function ContactForm({ onSubmitEndpoint }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card form">
+    <form ref={formRef} onSubmit={handleSubmit} className="card form">
       <div className="field">
         <label htmlFor="name">Name</label>
         <input id="name" name="name" value={values.name} onChange={handleChange} placeholder="Your name" />
