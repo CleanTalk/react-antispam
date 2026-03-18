@@ -210,3 +210,7 @@ For more information about CleanTalk Bot Detector, visit: [CleanTalk Documentati
 
 Private project
 
+### Websites that trust CleanTalk!
+
+![CleanTalk Anti-Spam Rating](https://cleantalk.org/webpack/img/cleantalk_rating.png)
+
