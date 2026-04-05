@@ -10,6 +10,8 @@ A React application with CleanTalk Bot Detector integration for spam protection.
 - 📝 Contact form with validation
 - 🎨 Modern, responsive UI
 
+If you find this project useful, please consider starring ⭐ it on GitHub — it helps us grow and support development!
+
 ## Installation
 
 1. Clone the repository:
